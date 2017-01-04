@@ -2,6 +2,7 @@
 CRUD permissions in Neo4j
 
 #### A prototype for implementing permissions in a graph db such as Neo4j
+https://docs.google.com/a/simonsfoundation.org/presentation/d/1JdXOrTi8yBlTcq32kJmv69NTa7t10KKbyVYUjbB2DF8/edit?usp=sharing
 
 Setup
 -------
