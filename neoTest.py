@@ -1,10 +1,12 @@
 from neo4j.v1 import GraphDatabase, basic_auth
 
+# helper function to get the db session
 def get_session():
     driver = GraphDatabase.driver("bolt://localhost", auth=basic_auth("neo4j", "neo4j"))
     session = driver.session()
     return session
 
+# helper function to validate if the user is present in the db.
 def validate_user(name):
 	session = get_session()
 	result = session.run("MATCH (u:User {name: {name}}) RETURN u.name AS name", {"name": name})
@@ -14,7 +16,7 @@ def validate_user(name):
 		return (results[0]['name'] == name)
 	return False
 
-
+# create request object either as owner or on behalf of some other user.
 def create_request(user, title, desc, owner=None):
 	if not validate_user(user):
 		return {'result': False, 'error': 'User not present'}
@@ -39,6 +41,7 @@ def create_request(user, title, desc, owner=None):
 		return {'result': True, 'error': None}
 	return {'result': False, 'error': results}
 
+# create a new user, everyone should be able to do it.
 def create_user(name, born):
 	session = get_session()
 	try:
@@ -50,7 +53,7 @@ def create_user(name, born):
 		session.close()
 	return {'result': True, 'error': None}
 
-
+# create objects by looking at the meta nodes.
 def create_object(user_name, object_name, data_name):
 	if not validate_user(user_name):
 		return {'result': False, 'error': 'User/AS User not present'}
@@ -79,6 +82,7 @@ def create_object(user_name, object_name, data_name):
 	session.close()
 	return({'result': False, 'error': "you don't have the necessary perssion to create this action"})
 
+# update user by looking at the User meta node
 def update_user(name, as_user, data):
 	if not validate_user(name) or not validate_user(as_user):
 		return {'result': False, 'error': 'User/AS User not present'}
@@ -104,6 +108,7 @@ def update_user(name, as_user, data):
 	session.close()
 	return({'result': True, 'error': None})
 
+# promote a user iff there is a path from the acting user to the group they are trying to promote to.
 def promote(user, groupName, as_user):
 	if not validate_user(user) or not validate_user(as_user):
 		return {'result': False, 'error': 'User/AS User not present'}
@@ -123,6 +128,7 @@ def promote(user, groupName, as_user):
 	session.close()
 	return{'result': False, 'error': 'we were not able to assign the user to the group.'}
 
+# take action on a request iff the action allows you to draw the Taken edge to it.
 def take_action(action, request, as_user):
 	if not validate_user(as_user):
 		return {'result': False, 'error': 'AS User not present'}
