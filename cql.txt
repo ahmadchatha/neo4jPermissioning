@@ -1,0 +1,37 @@
+CREATE (TheMatrix:Request {title:'The Matrix', desc:'Welcome to the Real World'})
+CREATE (TopGun:Request {title:"Top Gun", desc:'Evil has its winning ways'})
+CREATE (Keanu:User {name:'Keanu Reeves', born:1964, is_active: True})
+CREATE (Carrie:User {name:'Carrie-Anne Moss', born:1967, is_active: True})
+CREATE (Laurence:User {name:'Laurence Fishburne', born:1961, is_active: True})
+CREATE (SfariAdmin:Group {name:'Sfari Admin'})
+CREATE (Admin:Group {name:'Admin'})
+CREATE (Create:Action {name:'Create', Taken:['Owner','In_Owner']})
+CREATE (Submit:Action {name:'Submit', Taken:['Owner','In_Owner']})
+CREATE (Approve:Action {name:'Approve', Taken:['In_Owner']})
+CREATE (Hold:Action {name:'Hold', Taken:['In_Owner']})
+CREATE (User:Object {name:'User', self_update_exceptions:['is_active']})
+CREATE (Action:Object {name:'Action', create:['Sfari Admin']})
+CREATE (Group:Object {name:'Group', create:['Admin']})
+
+
+CREATE
+  (Keanu)-[:Owner {When: 'Tuesday'}]->(TheMatrix),
+  (Carrie)-[:Owner {When: 'Tuesday'}]->(TopGun),
+  (SfariAdmin)-[:Owner {When: 'Tuesday'}]->(TheMatrix),
+  (SfariAdmin)-[:Owner {When: 'Tuesday'}]->(TopGun),
+  (Admin)-[:Owner {When: 'Tuesday'}]->(Keanu),
+  (Admin)-[:Owner {When: 'Tuesday'}]->(Laurence),
+  (Admin)-[:Owner {When: 'Tuesday'}]->(Carrie),
+  (Admin)-[:Owner {When: 'Tuesday'}]->(SfariAdmin),
+  (Keanu)-[:In {Since: 'Tuesday'}]->(SfariAdmin),
+  (Keanu)-[:In {Since: 'Tuesday'}]->(Admin)
+
+
+CREATE CONSTRAINT ON (u:User) ASSERT u.name IS UNIQUE
+CREATE CONSTRAINT ON (r:Request) ASSERT r.title IS UNIQUE
+CREATE CONSTRAINT ON (a:Action) ASSERT a.name IS UNIQUE
+CREATE CONSTRAINT ON (g:Group) ASSERT g.name IS UNIQUE
+
+MATCH (r:Request), (a:Action) OPTIONAL MATCH (r)-[r1]-(a) DELETE r1
+MATCH (u:User),(r:Request),(a:Action),(g:Group),(o:object) OPTIONAL MATCH  (u)-[r1]-(), (g)-[r2]-() DELETE u,r,a,g,r1,r2,o
+  
