@@ -2,7 +2,7 @@
 CRUD permissions in Neo4j
 
 #### A prototype for implementing permissions in a graph db such as Neo4j
-https://docs.google.com/a/simonsfoundation.org/presentation/d/1JdXOrTi8yBlTcq32kJmv69NTa7t10KKbyVYUjbB2DF8/edit?usp=sharing
+https://docs.google.com/presentation/d/1jGh-QAI1EZVVPothAw8CjpWOfDcUVmYaA7OMdBdXaTs/edit?usp=sharing
 
 Setup
 -------
@@ -12,6 +12,8 @@ First install community version of Neo4j for your os at https://neo4j.com/
 Create virtualenv, activate it and do
 
 	pip install -r requirements.txt
+	
+Run the CREATE queries from cql.txt in the neo4j UI to insert the data into the db.
 	
 Run
 -------
