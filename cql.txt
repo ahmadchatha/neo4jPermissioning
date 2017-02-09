@@ -1,10 +1,15 @@
-CREATE (TheMatrix:Request {title:'The Matrix', desc:'Welcome to the Real World'})
-CREATE (TopGun:Request {title:"Top Gun", desc:'Evil has its winning ways'})
-CREATE (Keanu:User {name:'Keanu Reeves', born:1964, is_active: True})
-CREATE (Carrie:User {name:'Carrie-Anne Moss', born:1967, is_active: True})
-CREATE (Laurence:User {name:'Laurence Fishburne', born:1961, is_active: True})
-CREATE (SfariAdmin:Group {name:'Sfari Admin'})
+CREATE (TheMatrix:Request {title:'The Matrix', desc:'Welcome to the Real World', date:1484239365, Budget:100000})
+CREATE (TopGun:Request {title:"Top Gun", desc:'Evil has its winning ways', date:1484239365, Budget:100000})
+CREATE (Planet:Request {title:"Planet Earth", desc:'Prepare to see it as never before.', date:1484239365, Budget:100000})
+CREATE (Keanu:User {username:'keanureeves', password: "$2a$12$kmLTSFcV3HkZzOO.EMLE4.vyLPI2mQQKV1xGjFsHcVi71wTXFxQfW", born:1964, is_active: True})
+CREATE (Carrie:User {username:'carriemoss', password: "$2a$12$kmLTSFcV3HkZzOO.EMLE4.vyLPI2mQQKV1xGjFsHcVi71wTXFxQfW", born:1967, is_active: True})
+CREATE (Laurence:User {username:'laurencefish', password: "$2a$12$kmLTSFcV3HkZzOO.EMLE4.vyLPI2mQQKV1xGjFsHcVi71wTXFxQfW", born:1961, is_active: True})
+CREATE (SfariAdmin:User {username:'sfariadmin', password: "$2a$12$kmLTSFcV3HkZzOO.EMLE4.vyLPI2mQQKV1xGjFsHcVi71wTXFxQfW", born:1961, is_active: True})
+CREATE (LifeAdmin:User {username:'lifeadmin', password: "$2a$12$kmLTSFcV3HkZzOO.EMLE4.vyLPI2mQQKV1xGjFsHcVi71wTXFxQfW", born:1961, is_active: True})
+CREATE (SfariReqs:Group {name:'Sfari Requests'})
+CREATE (LifeReqs:Group {name:'Life Sciences Requests'})
 CREATE (Admin:Group {name:'Admin'})
+CREATE (PermAdmin:Group {name:'Permission Admin'})
 CREATE (Create:Action {name:'Create', Taken:['Owner','In_Owner']})
 CREATE (Submit:Action {name:'Submit', Taken:['Owner','In_Owner']})
 CREATE (Approve:Action {name:'Approve', Taken:['In_Owner']})
@@ -12,19 +17,21 @@ CREATE (Hold:Action {name:'Hold', Taken:['In_Owner']})
 CREATE (User:Object {name:'User', self_update_exceptions:['is_active']})
 CREATE (Action:Object {name:'Action', create:['Sfari Admin']})
 CREATE (Group:Object {name:'Group', create:['Admin']})
+CREATE (Request:Object {name:'Request', create:[], fields:['title','desc','date','budget'], sfari_applicant_owner_read:['title','desc','date'], sfari_applicant_owner_write:['title','desc'], life_applicant_owner_read:['title','desc', 'budget'], life_applicant_owner_write:['title','desc', 'budget']})
 
 
 CREATE
-  (Keanu)-[:Owner {When: 'Tuesday'}]->(TheMatrix),
-  (Carrie)-[:Owner {When: 'Tuesday'}]->(TopGun),
-  (SfariAdmin)-[:Owner {When: 'Tuesday'}]->(TheMatrix),
-  (SfariAdmin)-[:Owner {When: 'Tuesday'}]->(TopGun),
-  (Admin)-[:Owner {When: 'Tuesday'}]->(Keanu),
-  (Admin)-[:Owner {When: 'Tuesday'}]->(Laurence),
-  (Admin)-[:Owner {When: 'Tuesday'}]->(Carrie),
-  (Admin)-[:Owner {When: 'Tuesday'}]->(SfariAdmin),
-  (Keanu)-[:In {Since: 'Tuesday'}]->(SfariAdmin),
-  (Keanu)-[:In {Since: 'Tuesday'}]->(Admin)
+  (Keanu)-[:sfari_applicant_owner {read_allowed:[], read_denied:[], write_allowed:[], write_denied:[]}]->(TheMatrix),
+  (Carrie)-[:sfari_applicant_owner {read_allowed:[], read_denied:[], write_allowed:[], write_denied:[]}]->(TopGun),
+  (Carrie)-[:life_applicant_owner {read_allowed:[], read_denied:[], write_allowed:[], write_denied:[]}]->(Planet),
+  (SfariReqs)-[:admin_owner {read: True, write: True}]->(TheMatrix),
+  (SfariReqs)-[:admin_owner {read: True, write: True}]->(TopGun),
+  (LifeReqs)-[:admin_owner {read: True, write: True}]->(Planet),
+  (Admin)-[:Owner {read: True, write: True}]->(Keanu),
+  (Admin)-[:Owner {read: True, write: True}]->(Laurence),
+  (Admin)-[:Owner {read: True, write: True}]->(Carrie),
+  (SfariAdmin)-[:In {Since: 'Tuesday'}]->(SfariReqs),
+  (LifeAdmin)-[:In {Since: 'Tuesday'}]->(LifeReqs)
 
 
 CREATE CONSTRAINT ON (u:User) ASSERT u.name IS UNIQUE
@@ -35,3 +42,6 @@ CREATE CONSTRAINT ON (g:Group) ASSERT g.name IS UNIQUE
 MATCH (r:Request), (a:Action) OPTIONAL MATCH (r)-[r1]-(a) DELETE r1
 MATCH (u:User),(r:Request),(a:Action),(g:Group),(o:object) OPTIONAL MATCH  (u)-[r1]-(), (g)-[r2]-() DELETE u,r,a,g,r1,r2,o
   
+MATCH (u:User {username: 'carriemoss'}), (r:Request {title: 'Top Gun'}) OPTIONAL MATCH (u)-[p]->(r) SET p.read_allowed=[],p.read_denied=[] RETURN p
+
+MATCH (o:Object {name: 'Request'}) SET o.admin_owner_read=['title','desc','date','budget'],o.admin_owner_write=['title','desc','date','budget'] RETURN o
